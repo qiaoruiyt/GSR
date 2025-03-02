@@ -1,0 +1,10 @@
+wilds==2.0.0
+torch==2.0.1
+torchvision
+pandas==1.5.3
+numpy==1.23.5
+tensorboard==2.13.0
+transformers==4.39.1
+wget
+# torch-scatter==2.1.2 # Manual installation
+
