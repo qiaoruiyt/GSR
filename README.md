@@ -2,14 +2,6 @@
 
 This repository provides the source code for group-robust sample reweighting (GSR), a method for improving robustness to subpopulation shifts, developed in the paper [Group-robust Sample Reweighting for Subpopulation Shifts via Influence Functions](https://openreview.net/forum?id=aQj9Ifxrl6) by Qiao et al. in ICLR 2025. 
 
-## Acknowledgments
-We make use of the following great open-source repositories:
-- [DFR](https://github.com/PolinaKirichenko/deep_feature_reweighting)
-- [torch-influence](https://github.com/alstonlo/torch-influence)
-- [WILDS](https://github.com/p-lambda/wilds)
-
-Thank you!
-
 ## Setup
 ```sh
 conda create -n gsr python=3.10   
@@ -65,3 +57,13 @@ Please cite our work at
    year={2025},
 }
 ```
+
+## Acknowledgments
+We make use of the following great open-source repositories:
+- [DFR](https://github.com/PolinaKirichenko/deep_feature_reweighting)
+- [DomainBed](https://github.com/facebookresearch/DomainBed)
+- [MAPLE](https://github.com/x-zho14/MAPLE)
+- [torch-influence](https://github.com/alstonlo/torch-influence)
+- [WILDS](https://github.com/p-lambda/wilds)
+
+Thank you!

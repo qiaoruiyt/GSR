@@ -23,13 +23,9 @@ from wilds.common.data_loaders import get_train_loader, get_eval_loader
 args = get_training_args()
 print(args)
 set_seed(args.seed)
-# print('Preparing directory %s' % args.output_dir)
 os.makedirs(args.output_dir, exist_ok=True)
 logger = Logger(os.path.join(args.output_dir, 'log.txt'))
 writer = SummaryWriter(log_dir=args.output_dir)
-# if not args.no_wandb:
-#     import wandb
-#     writer = wandb.init(project='train_basemodel', group=args.runs_name, config=args)
 
 train_transform, test_transform = get_transform(args.dataset, args)
 dataset = get_dataset(dataset=args.dataset, root_dir=args.root_dir, download=args.download)

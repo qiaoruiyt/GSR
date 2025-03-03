@@ -175,7 +175,6 @@ class WeightedObjective(BaseObjective):
         if self.weight_decay == 0:
             return 0
         return self.weight_decay * torch.square(params.norm())
-        # return 0
 
     # training loss by default taken to be 
     # train_loss_on_outputs + train_regularization
@@ -410,7 +409,6 @@ class GSRTrainer:
         if self.writer is not None:
             if header != '':
                 header = header + "_"
-            # for i in range(self.n_groups):
             for i in range(len(group_loss)):
                 self.writer.log({f"group_{i}_{header}loss": group_loss[i], f"group_{i}_{header}acc": group_acc[i]}, step=step)
             self.writer.log({f"worst_group_{header}loss": worst_group_loss, f"worst_group_{header}acc": worst_group_acc}, step=step)
@@ -709,14 +707,9 @@ class GSRTrainer:
                     writer.log({"raw_scores_max": scores.max().item(), "raw_scores_min": scores.min().item(), "raw_scores_mean": scores.mean().item()}, step=outer_iter)
                     writer.log({"raw_scores_norm": torch.linalg.vector_norm(scores).item()}, step=outer_iter)
 
-                # calibrated_scores = scores*num_train
-
                 if self.outer_max_magnitude is not None and self.outer_max_magnitude > 0:
                     scores_mag = torch.abs(scores)
                     scores = scores / scores_mag.max() * outer_max_magnitude 
-                    
-                # if self.optimizer != 'lbfgs' and not self.normalize_weights_batch: # divide by batch size due to unnormalized objective for torch-influence
-                #     scores = scores / batch_size
                 
                 if self.outer_grad_clip is not None and self.outer_grad_clip > 0:
                     score_norm = torch.linalg.vector_norm(scores)

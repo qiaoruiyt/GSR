@@ -82,17 +82,14 @@ class FastExactInfluenceModule(BaseInfluenceModule):
 
         grads = []
         train_idxs = list(range(len(self.train_loader.dataset)))
-        # for grad_z, _ in self._loss_grad_loader_wrapper(batch_size=1, subset=train_idxs, train=True):
         for grad_z, _ in self.per_sample_loss_grad_loader_wrapper(batch_size=self.grad_bs, subset=train_idxs, train=True):
             grads.append(grad_z)
         train_grads = torch.cat(grads, dim=0)
         self.train_vihp = train_grads @ self.inverse_hess
 
-
     def inverse_hvp(self, vec):
         raise Exception("This should not be called")
         return self.inverse_hess @ vec
-
 
     def influences(
             self,
@@ -106,7 +103,6 @@ class FastExactInfluenceModule(BaseInfluenceModule):
         test_grads = self.test_loss_grad(test_idxs)
         return self.train_vihp[train_idxs, :] @ test_grads / len(self.train_loader.dataset)
 
-    
     def per_sample_loss_grad_loader_wrapper(self, train, **kwargs):
         if train:
             if hasattr(self.objective, "sample_weights") and self.objective.sample_weights is not None:
@@ -130,13 +126,6 @@ class FastExactInfluenceModule(BaseInfluenceModule):
         ft_compute_sample_grad = vmap(ft_compute_grad, in_dims=(None, None, 0))
         
         for batch, batch_size in self._loader_wrapper(train=train, **kwargs):
-            # params = self._model_params(with_names=False)
-            # flat_params = self._flatten_params_like(params)
-            # loss = loss_fn(model=self.model, params=flat_params, batch=batch)
-            # sample_grad = self._flatten_params_like(torch.autograd.grad(loss, params))
-            # print(sample_grad.shape)
-            # yield self._flatten_params_like(torch.autograd.grad(loss, params)), batch_size
-
             ft_per_sample_grads = ft_compute_sample_grad(params_dict, buffers, batch)
             param_grads = [grad.view(grad.size(0), -1) for _, grad in ft_per_sample_grads.items()]
             param_grads = torch.cat(param_grads, dim=1)
@@ -175,17 +164,14 @@ class FastHFInfluenceModule(BaseInfluenceModule):
         train_idxs = list(range(len(self.train_loader.dataset)))
         with torch.no_grad():
             self._model_reinsert_params(self._reshape_like_params(flat_params), register=True)
-        # for grad_z, _ in self._loss_grad_loader_wrapper(batch_size=1, subset=train_idxs, train=True):
         for grad_z, _ in self.per_sample_loss_grad_loader_wrapper(batch_size=self.grad_bs, subset=train_idxs, train=True):
             grads.append(grad_z)
         train_grads = torch.cat(grads, dim=0)
         self.train_vihp = train_grads 
 
-
     def inverse_hvp(self, vec):
         raise Exception("This should not be called")
         return self.inverse_hess @ vec
-
 
     def influences(
             self,
@@ -199,7 +185,6 @@ class FastHFInfluenceModule(BaseInfluenceModule):
         test_grads = self.test_loss_grad(test_idxs)
         return self.train_vihp[train_idxs, :] @ test_grads / len(self.train_loader.dataset)
 
-    
     def per_sample_loss_grad_loader_wrapper(self, train, **kwargs):
         if train:
             if hasattr(self.objective, "sample_weights") and self.objective.sample_weights is not None:
@@ -223,13 +208,6 @@ class FastHFInfluenceModule(BaseInfluenceModule):
         ft_compute_sample_grad = vmap(ft_compute_grad, in_dims=(None, None, 0))
         
         for batch, batch_size in self._loader_wrapper(train=train, **kwargs):
-            # params = self._model_params(with_names=False)
-            # flat_params = self._flatten_params_like(params)
-            # loss = loss_fn(model=self.model, params=flat_params, batch=batch)
-            # sample_grad = self._flatten_params_like(torch.autograd.grad(loss, params))
-            # print(sample_grad.shape)
-            # yield self._flatten_params_like(torch.autograd.grad(loss, params)), batch_size
-
             ft_per_sample_grads = ft_compute_sample_grad(params_dict, buffers, batch)
             param_grads = [grad.view(grad.size(0), -1) for _, grad in ft_per_sample_grads.items()]
             param_grads = torch.cat(param_grads, dim=1)

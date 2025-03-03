@@ -31,8 +31,6 @@ def add_label_noise(y, noise_level):
     return y, noise_indices
 
 
-
-# def evaluate_group_metrics(model, loader, n_groups, device='cuda'):
 def evaluate_group_metrics(model, loader, device='cuda'):
     n_groups = loader.dataset.n_groups
     use_prepared_group_indices = False
@@ -78,8 +76,6 @@ def get_scheduler(lr_scheduler_name, args=None):
 
 
 class StepLR:
-    # def __init__(self, step_size=20, gamma=0.1):
-    # def __init__(self, step_size=25, gamma=0.1**0.5): xx
     def __init__(self, step_size=30, gamma=0.1):
         self.step_size = step_size
         self.gamma = gamma
@@ -313,11 +309,9 @@ def get_training_args():
     parser.add_argument("--scheduler", action='store_true', help="Learning rate scheduler")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_epochs", type=int, default=300)
-    # parser.add_argument("--weight_decay", type=float, default=1e-4)
     parser.add_argument("--momentum_decay", type=float, default=0.9)
     parser.add_argument("--init_lr", type=float, default=0.001)
     parser.add_argument("--eval_freq", type=int, default=1)
-    # parser.add_argument("--seed", type=int, default=1) # seed 1 was used by DFR and AFR
     parser.add_argument("--held_out_ratio", type=float, default=0.1)
     args = parser.parse_args()
     args.root_dir = os.path.expanduser(args.root_dir)
@@ -587,45 +581,6 @@ def featurize_dataset(dataset, featurizer, args):
     all_y = torch.cat(all_y)
     all_metadata = torch.cat(all_metadata)
     return all_embeddings, all_y, all_metadata
-
-
-def get_loader(data, train, reweight_groups, reweight_classes, reweight_places, **kwargs):
-    if not train: # Validation or testing
-        assert reweight_groups is None
-        assert reweight_classes is None
-        assert reweight_places is None
-        shuffle = False
-        sampler = None
-    elif not (reweight_groups or reweight_classes or reweight_places): # Training but not reweighting
-        shuffle = True
-        sampler = None
-    elif reweight_groups:
-        # Training and reweighting groups
-        # reweighting changes the loss function from the normal ERM (average loss over each training example)
-        # to a reweighted ERM (weighted average where each (y,c) group has equal weight)
-        group_weights = len(data) / data.group_counts
-        weights = group_weights[data.group_array]
-
-        # Replacement needs to be set to True, otherwise we'll run out of minority samples
-        sampler = WeightedRandomSampler(weights, len(data), replacement=True)
-        shuffle = False
-    elif reweight_classes:  # Training and reweighting classes
-        class_weights = len(data) / data.y_counts
-        weights = class_weights[data.y_array]
-        sampler = WeightedRandomSampler(weights, len(data), replacement=True)
-        shuffle = False
-    else: # Training and reweighting places
-        place_weights = len(data) / data.p_counts
-        weights = place_weights[data.p_array]
-        sampler = WeightedRandomSampler(weights, len(data), replacement=True)
-        shuffle = False
-
-    loader = DataLoader(
-        data,
-        shuffle=shuffle,
-        sampler=sampler,
-        **kwargs)
-    return loader
 
 
 def get_eval_fn(eval_fn, y, metadata):
